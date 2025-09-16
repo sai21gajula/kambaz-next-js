@@ -258,7 +258,7 @@ export default function Lab1() {
             <option value="SCIFI" selected>Science Fiction</option>
             <option value="FANTASY">Fantasy</option>
           </select>
-          {/* --- 1.3.7.7: Other Field Types  Need to ask the TAS for if this right ornot--- */}
+          {/* --- 1.3.7.7: Other Field Types  Need to ask the TAS for if this right ornot can we put default opton or not --- */}
 
           {/* --- 1.3.7.7: Other Field Types --- */}
           <h4>Other HTML field types</h4>
@@ -294,3 +294,4 @@ export default function Lab1() {
     </div>
   );
 
+}

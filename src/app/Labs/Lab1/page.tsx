@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 
 export default function Lab1() {
   return (
@@ -173,18 +172,17 @@ export default function Lab1() {
         <h4>Image tag</h4>
         Loading an image from the internet:
         <br />
-        <Image
+        <img
           id="wd-starship"
           src="https://www.staradvertiser.com/wp-content/uploads/2021/08/web1_Starship-gap2.jpg"
           alt="Starship rocket launch"
           width={400}
           height={225}
-          unoptimized
         />
         <br />
         Loading a local image:
         <br />
-        <Image
+        <img
           id="wd-teslabot"
           src="/images/teslabot.jpg"
           alt="Teslabot"

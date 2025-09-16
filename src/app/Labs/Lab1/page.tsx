@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 export default function Lab1() {
   return (
     <div id="wd-lab1">
@@ -171,12 +173,24 @@ export default function Lab1() {
         <h4>Image tag</h4>
         Loading an image from the internet:
         <br />
-        <img id="wd-starship" width="400px"
-          src="https://www.staradvertiser.com/wp-content/uploads/2021/08/web1_Starship-gap2.jpg" />
+        <Image
+          id="wd-starship"
+          src="https://www.staradvertiser.com/wp-content/uploads/2021/08/web1_Starship-gap2.jpg"
+          alt="Starship rocket launch"
+          width={400}
+          height={225}
+          unoptimized
+        />
         <br />
         Loading a local image:
         <br />
-        <img id="wd-teslabot" src="/images/teslabot.jpg" height="200px" />
+        <Image
+          id="wd-teslabot"
+          src="/images/teslabot.jpg"
+          alt="Teslabot"
+          width={200}
+          height={200}
+        />
       </div>
     <div id="wd-forms">
         <h4>Form Elements</h4>

@@ -1,10 +1,14 @@
 "use client";
 
-
 export default function Lab1() {
   return (
     <div id="wd-lab1">
       <h2>Lab 1</h2>
+      <div >
+        <strong>Name:</strong> Bharath Gajula<br />
+        <strong>Course:</strong> CS5610 Web Development, Fall 2025<br />
+        <strong>GitHub:</strong> <a href="https://github.com/sai21gajula/kambaz-next-js" target="_blank" rel="noopener noreferrer">Kambaz Github</a>
+      </div>
         <h3>HTML Examples</h3>
       <div id="wd-h-tag">
         <h4>Heading Tags</h4>
@@ -193,7 +197,6 @@ export default function Lab1() {
     <div id="wd-forms">
         <h4>Form Elements</h4>
         <form id="wd-text-fields">
-          {/* --- 1.3.7.1: Text Fields --- */}
           <h5>Text Fields</h5>
           <label htmlFor="wd-text-fields-username">Username:</label>
           <input placeholder="jdoe" id="wd-text-fields-username" /> <br />
@@ -207,6 +210,7 @@ export default function Lab1() {
                  value="Wonderland"
                  title="The last name"
                  id="wd-text-fields-last-name" />
+          
 
           {/* --- 1.3.7.2: Textarea --- */}
           <h5>Text boxes</h5>
@@ -273,6 +277,7 @@ export default function Lab1() {
           {/* --- 1.3.7.7: Other Field Types  Need to ask the TAS for if this right ornot can we put default opton or not --- */}
 
           {/* --- 1.3.7.7: Other Field Types --- */}
+          {/* --- 1.3.7.7: Other Field Types --- */}
           <h4>Other HTML field types</h4>
           <label htmlFor="wd-text-fields-email"> Email: </label>
           <input type="email"
@@ -280,18 +285,17 @@ export default function Lab1() {
                 id="wd-text-fields-email"/><br/>
           <label htmlFor="wd-text-fields-salary-start"> Starting salary: </label>
           <input type="number"
-                value="100000"
+                defaultValue="100000"  
                 placeholder="1000"
                 id="wd-text-fields-salary-start"/><br/>
           <label htmlFor="wd-text-fields-rating"> Rating: </label>
           <input type="range"
-                value="4"
+                defaultValue="4"      
                 max="5"
-                placeholder="Doe"
                 id="wd-text-fields-rating"/><br/>
           <label htmlFor="wd-text-fields-dob"> Date of birth: </label>
           <input type="date"
-                value="2000-01-21"
+                defaultValue="2000-01-21" 
                 id="wd-text-fields-dob"/><br/>
         </form>
       </div>
@@ -299,11 +303,9 @@ export default function Lab1() {
         <h4>Anchor tag</h4>
         Please <a href="https://www.lipsum.com" id="wd-lipsum">click here</a> to get dummy text<br/>
         
-        {/* TODO: Add link to your GitHub repository here */}
-        <a href="https://github.com/sai21gajula/" id="wd-github">My GitHub Repo</a>
+        <a href="https://github.com/sai21gajula/kambaz-next-js" id="wd-github">My GitHub Repo</a>
       </div>
 
     </div>
   );
-
 }

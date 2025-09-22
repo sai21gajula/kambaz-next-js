@@ -20,7 +20,7 @@ export default function TOC() {
      </li>
      {/* this is need to be asked to professor or ta for usign id wd-lab 3 link */}
       <li>
-       <Link href="/" id="wd-lab3-link">
+       <Link href="/" id="wd-kambaz-link">
          Kambaz </Link> </li>
    </ul>
 );}

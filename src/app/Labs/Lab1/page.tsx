@@ -6,7 +6,8 @@ export default function Lab1() {
       <h2>Lab 1</h2>
       <div >
         <strong>Name:</strong> Bharath Gajula<br />
-        <strong>Course:</strong> CS5610 Web Development, Fall 2025<br />
+        <strong>Course:</strong> CS5610 Web Development, Fall 2025 <br/>
+        <strong>Section:</strong> 18616.202610<br />
         <strong>GitHub:</strong> <a href="https://github.com/sai21gajula/kambaz-next-js" target="_blank" rel="noopener noreferrer">Kambaz G</a>
       </div>
         <h3>HTML Examples</h3>

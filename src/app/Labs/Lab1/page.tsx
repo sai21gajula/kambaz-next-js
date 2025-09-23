@@ -7,7 +7,7 @@ export default function Lab1() {
       <div >
         <strong>Name:</strong> Bharath Gajula<br />
         <strong>Course:</strong> CS5610 Web Development, Fall 2025<br />
-        <strong>GitHub:</strong> <a href="https://github.com/sai21gajula/kambaz-next-js" target="_blank" rel="noopener noreferrer">Kambaz Github</a>
+        <strong>GitHub:</strong> <a href="https://github.com/sai21gajula/kambaz-next-js" target="_blank" rel="noopener noreferrer">Kambaz G</a>
       </div>
         <h3>HTML Examples</h3>
       <div id="wd-h-tag">
@@ -212,7 +212,7 @@ export default function Lab1() {
                  id="wd-text-fields-last-name" />
           
 
-          {/* --- 1.3.7.2: Textarea --- */}
+          {/* ---  Textarea --- */}
           <h5>Text boxes</h5>
           <label>Biography:</label><br/>
           <textarea id="wd-textarea" cols={30} rows={10}>Lorem ipsum dolor sit
@@ -224,7 +224,7 @@ export default function Lab1() {
           cupidatat non proident, sunt in culpa qui officia deserunt mollit
           anim id est laborum.</textarea>
 
-          {/* --- 1.3.7.3: Buttons --- */}
+          {/* --- Buttons --- */}
           <h5 id="wd-buttons">Buttons</h5>
           <button type="button"
                   onClick={() => alert("Life is Good!")}
@@ -232,7 +232,7 @@ export default function Lab1() {
             Hello World!
           </button>
 
-          {/* --- 1.3.7.4: Radio Buttons --- */}
+          {/* --- Radio Buttons --- */}
           <h5 id="wd-radio-buttons">Radio buttons</h5>
           <label>Favorite movie genre:</label><br />
           <input type="radio" name="radio-genre" id="wd-radio-comedy"/>
@@ -244,7 +244,7 @@ export default function Lab1() {
           <input type="radio" name="radio-genre" id="wd-radio-fantasy"/>
           <label htmlFor="wd-radio-fantasy">Fantasy</label>
 
-          {/* --- 1.3.7.5: Checkboxes --- */}
+          {/* --- Checkboxes --- */}
           <h5 id="wd-checkboxes">Checkboxes</h5>
           <label>Favorite movie genre:</label><br/>
           <input type="checkbox" name="check-genre" id="wd-chkbox-comedy"/>
@@ -256,7 +256,7 @@ export default function Lab1() {
           <input type="checkbox" name="check-genre" id="wd-chkbox-fantasy"/>
           <label htmlFor="wd-chkbox-fantasy">Fantasy</label>
 
-          {/* --- 1.3.7.6: Dropdowns --- */}
+          {/* ---  Dropdowns --- */}
           <h4 id="wd-dropdowns">Dropdowns</h4>
           <h5>Select one</h5>
           <label htmlFor="wd-select-one-genre"> Favorite movie genre: </label><br/>
@@ -274,10 +274,8 @@ export default function Lab1() {
             <option value="SCIFI" selected>Science Fiction</option>
             <option value="FANTASY">Fantasy</option>
           </select>
-          {/* --- 1.3.7.7: Other Field Types  Need to ask the TAS for if this right ornot can we put default opton or not --- */}
+          {/* ---  Other Field Types  Need to ask the TAS for if this right ornot can we put default opton or not --- */}
 
-          {/* --- 1.3.7.7: Other Field Types --- */}
-          {/* --- 1.3.7.7: Other Field Types --- */}
           <h4>Other HTML field types</h4>
           <label htmlFor="wd-text-fields-email"> Email: </label>
           <input type="email"

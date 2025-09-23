@@ -46,6 +46,7 @@ export default function Modules() {
             </li>
           </ul>
         </li>
+        <br/>
         <li className="wd-module">
           <div className="wd-title">Week 1, Lecture 2 - Formatting User Interfaces with HTML</div>
           <ul className="wd-lessons">
@@ -62,6 +63,34 @@ export default function Modules() {
                 <li className="wd-content-item">Introduction to HTML and the DOM</li>
                 <li className="wd-content-item">Formatting Web content with Headings and Paragraphs</li>
                 <li className="wd-content-item">Formatting content with Lists and Tables</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <br/>
+
+        <li className="wd-module">
+          <div className="wd-title">Week 2, Lecture 1 - Advanced CSS and Responsive Design</div>
+          <ul className="wd-lessons">
+            <li className="wd-lesson">
+              <span className="wd-title">LEARNING OBJECTIVES</span>
+              <ul className="wd-content">
+                <li className="wd-content-item">Understand Flexbox and Grid</li>
+                <li className="wd-content-item">Learn responsive design principles</li>
+              </ul>
+            </li>
+            <li className="wd-lesson">
+              <span className="wd-title">READING</span>
+              <ul className="wd-content">
+                <li className="wd-content-item">MDN Web Docs: CSS Flexbox</li>
+                <li className="wd-content-item">MDN Web Docs: CSS Grid</li>
+              </ul>
+            </li>
+            <li className="wd-lesson">
+              <span className="wd-title">ASSIGNMENT</span>
+              <ul className="wd-content">
+                <li className="wd-content-item">Build a responsive landing page</li>
+                <li className="wd-content-item">Submit screenshots of your design</li>
               </ul>
             </li>
           </ul>

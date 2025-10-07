@@ -1,8 +1,30 @@
 import "./index.css";
+import ForegroundColors from "./ForegroundColors";
+import BackgroundColors from "./BackgroundColors";
+import Borders from "./Borders";
+import Padding from "./Padding";
+import Margins from "./Margins";
+import Corners from "./Corners";
+import Dimensions from "./Dimensions";
+import Positions from "./Positions";
+import Zindex from "./Zindex";
+import Floats from "./Float";
+import GridLayout from "./GridLayout";
+import Flex from "./Flex";
+import ReactIconsSampler from "./ReactIcons";
+import BootstrapGrids from "./BootstrapGrids";
+import ScreenSizeLabel from "./ScreenSizeLabel";
+import Container from "react-bootstrap/Container";
+import BootstrapTables from "./BootstrapTables";
+import BootstrapLists from "./BootstrapLists";  
+import BootstrapForms from "./BootstrapForms";
+import BootstrapNavigation from "./BootstrapNavigation";
+
 
 export default function Lab2() {
   return (
-    <div id="wd-lab2">
+    //<div id="wd-lab2">
+      <Container id="wd-lab2">
       <h2>Lab 2 - Cascading Style Sheets</h2>
       <h3>Styling with the STYLE attribute</h3>
       <p>
@@ -23,6 +45,83 @@ export default function Lab2() {
           feel
         </p>
       </div>
-    </div>
-);}
+
+      {/* Section 2.1.4 */}
+      <div id="wd-css-class-selectors">
+        <h3>Class selectors</h3>
+        <p className="wd-class-selector">
+          Instead of using IDs to refer to elements, you can use an element&apos;s CLASS attribute
+        </p>
+        <h4 className="wd-class-selector">
+          This heading has same style as paragraph above
+        </h4>
+      </div>
+      {/* Section 2.1.5` */}
+
+      <div id="wd-css-document-structure">
+        <div className="wd-selector-1">
+          <h3>Document structure selectors</h3>
+          <div className="wd-selector-2">
+            Selectors can be combined to refer elements in particular
+            places in the document
+            <p className="wd-selector-3">
+              This paragraph&apos;s red background is referenced as
+              <br />
+              .selector-2 .selector3
+              <br />
+              meaning the descendant of some ancestor.
+              <br />
+              <span className="wd-selector-4">
+                Whereas this span is a direct child of its parent
+              </span>
+              <br />
+              You can combine these relationships to create specific
+              styles depending on the document structure
+            </p>
+          </div>
+        </div>
+      </div>
+        {/* Section 2.1.7 - Foreground color example */}
+      <ForegroundColors />
+      {/* Section 2.1.8 - Background color example */}
+      <BackgroundColors />
+
+      {/* Section 2.1.9 - Borders example */}
+      <Borders />
+      {/* Section 2.1.10 - Padding example */}
+      <Padding />
+      <Margins />
+      {/* Section 2.1.11 - Corners example */}
+      <Corners />
+      {/* Section 2.1.12 - Dimensions example */}
+      <Dimensions />
+      {/* Section 2.1.13 - Positions example */}
+      <Positions />
+      {/* Section 2.1.16 - Z-index example */}
+      <Zindex />
+      {/* Section 2.1.17 - Floats example */}
+      <Floats />
+      {/* Section 2.1.18- Grid layout example */}
+      <GridLayout />
+      {/* Section 2.1.19 - Flex example */}
+      <Flex />
+      {/* Section 2.1.20 - React Icons example */}
+      <ReactIconsSampler />
+
+      {/* Section 2.3.2 - Bootstrap Grids example */}
+      <BootstrapGrids />
+
+      {/* Section 2.3.3 - Screen size label example */}
+      <ScreenSizeLabel />
+      {/* Section 2.3.4 - Bootstrap Tables example */ }
+      <BootstrapTables />
+      {/* Section 2.3.5 - Bootstrap Lists example */ }
+      <BootstrapLists />
+      {/* Section 2.3.6 - Bootstrap Forms example */ }
+      <BootstrapForms />
+      {/* Section 2.3.7 - Bootstrap Navigation example */ }
+      <BootstrapNavigation />
+    </Container>
+  );
+}
 

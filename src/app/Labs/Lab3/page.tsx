@@ -59,8 +59,6 @@ export default function Lab3() {
   <FilterFunction/>
   <JsonStringify/>
   <House/>
-  <TodoItem/>
-  <TodoList/>
   <Spreading/>
   <Destructing/>
   <FunctionDestructing/>
@@ -75,6 +73,8 @@ export default function Lab3() {
      vel nihil repellat nemo explicabo excepturi consectetur. Modi omnis minus sequi maiores, provident voluptates.
    </Highlight>
     <PathParameters />
+     <TodoItem/>
+    <TodoList/>
 
     </div>
 );}

@@ -1,4 +1,6 @@
 "use client"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import Link from "next/link";
 import { ListGroup, ListGroupItem, Button, Form, Modal } from "react-bootstrap";
 import { BsGripVertical } from "react-icons/bs";

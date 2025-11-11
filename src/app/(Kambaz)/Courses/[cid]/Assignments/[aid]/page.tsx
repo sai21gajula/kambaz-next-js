@@ -1,4 +1,5 @@
 "use client"
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Form, Button, Row, Col, Card, FormGroup } from "react-bootstrap";
 import { useParams, useRouter } from "next/navigation";

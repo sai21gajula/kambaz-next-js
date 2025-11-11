@@ -20,6 +20,20 @@ export default function Dashboard() {
     image: "/images/reactjs.jpg", description: "New Description"
   });
 
+  const addCourse = () => {
+    dispatch(addNewCourse(course));
+    // Reset form after adding
+    setCourse({
+      _id: "0", name: "New Course", number: "New Number",
+      startDate: "2023-09-10", endDate: "2023-12-15",
+      image: "/images/reactjs.jpg", description: "New Description"
+    });
+  };
+
+  const updateExistingCourse = () => {
+    dispatch(updateCourse(course));
+  };
+
   const enrolledCourses = currentUser ? courses.filter((course) =>
     enrollments.some(
       (enrollment: any) =>
@@ -28,16 +42,21 @@ export default function Dashboard() {
     )
   ) : [];
 
+  // Show all courses for faculty, or enrolled courses for students
+  const displayedCourses = currentUser 
+    ? ((currentUser as any).role === "FACULTY" ? courses : enrolledCourses)
+    : [];
+
   return (
     <div id="wd-dashboard">
       <h1 id="wd-dashboard-title">Dashboard</h1> <hr />
       <h5>New Course
         <button className="btn btn-warning float-end me-2"
                 id="wd-update-course-click"
-                onClick={() => dispatch(updateCourse(course))}> Update </button>
+                onClick={updateExistingCourse}> Update </button>
         <button className="btn btn-primary float-end me-2"
                 id="wd-add-new-course-click"
-                onClick={() => dispatch(addNewCourse(course))}> Add </button>
+                onClick={addCourse}> Add </button>
       </h5>
       <div className="mb-3">
         <FormControl 
@@ -53,11 +72,11 @@ export default function Dashboard() {
           onChange={(e) => setCourse({ ...course, description: e.target.value })} />
       </div>
       <hr />
-      <h2 id="wd-dashboard-published">Published Courses ({enrolledCourses.length})</h2> <hr />
+      <h2 id="wd-dashboard-published">Published Courses ({displayedCourses.length})</h2> <hr />
       <div id="wd-dashboard-courses">
 
         <Row xs={1} sm={2} md={5} lg={6} className="g-4">
-        {enrolledCourses.map((course) => (
+        {displayedCourses.map((course) => (
           <Col key={course._id} className="wd-dashboard-course" style={{ width: "300px" }}>
               <Card>
                 <Link href={`/Courses/${course._id}/Home`}       

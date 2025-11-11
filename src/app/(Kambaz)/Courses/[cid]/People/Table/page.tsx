@@ -3,10 +3,16 @@
 import { Table } from "react-bootstrap";
 import { FaUserCircle } from "react-icons/fa";
 import { useParams } from "next/navigation";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../store";
 import * as db from "../../../../Database";
+
 export default function PeopleTable() {
-      const { cid } = useParams();
-  const { users, enrollments } = db;
+  const { cid } = useParams();
+  const { users } = db;
+  // Use Redux enrollments instead of static db.enrollments
+  const { enrollments } = useSelector((state: RootState) => state.enrollmentsReducer);
+  
  return (
   <div id="wd-people-table">
    <Table striped>
@@ -16,7 +22,7 @@ export default function PeopleTable() {
     <tbody>
   {users
     .filter((usr) =>
-      enrollments.some((enrollment) => enrollment.user === usr._id && enrollment.course === cid)
+      enrollments.some((enrollment: any) => enrollment.user === usr._id && enrollment.course === cid)
     )
     .map((user: any) => (
       <tr key={user._id}>

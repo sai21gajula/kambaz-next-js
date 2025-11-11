@@ -35,7 +35,7 @@ export default function Signin() {
         <FormControl 
           id="wd-username"
           className="wd-username mb-2"
-          placeholder="username"
+          placeholder="e.g., iron_man"
           size="lg"
           value={credentials.username || ""}
           onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
@@ -44,7 +44,7 @@ export default function Signin() {
         <FormControl 
           id="wd-password"
           className="wd-password mb-2 mt-1"
-          placeholder="password" 
+          placeholder="e.g., stark123" 
           type="password"
           size="lg"
           value={credentials.password || ""}

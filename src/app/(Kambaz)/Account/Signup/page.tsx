@@ -13,20 +13,20 @@ export default function Signup() {
         
         <Form.Control 
           className="wd-username mb-2"
-          placeholder="username"
+          placeholder="e.g., iron_man"
           size="lg"
         />
         
         <Form.Control 
           className="wd-password mb-2"
-          placeholder="password" 
+          placeholder="e.g., stark123" 
           type="password"
           size="lg"
         />
         
         <Form.Control 
           className="wd-password-verify mb-2"
-          placeholder="verify password" 
+          placeholder="Verify password" 
           type="password"
           size="lg"
         />

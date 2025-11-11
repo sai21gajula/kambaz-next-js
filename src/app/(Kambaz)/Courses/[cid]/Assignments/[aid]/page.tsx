@@ -1,14 +1,69 @@
 "use client"
 
 import { Form, Button, Row, Col, Card, FormGroup } from "react-bootstrap";
-import assignments from "../../../../Database/assignments.json";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { addAssignment, updateAssignment } from "../reducer";
+import { RootState } from "../../../../store";
 
 export default function AssignmentEditor() {
-  const cid = useParams().cid;
-  const aid = useParams().aid;
-  const assignment = assignments.find((a) => a._id === aid);
+  const { cid, aid } = useParams();
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const { assignments } = useSelector((state: RootState) => state.assignmentsReducer);
+  const assignment = assignments.find((a: any) => a._id === aid);
+  const isNewAssignment = aid === "new";
+
+  const [formData, setFormData] = useState<any>({
+    title: "",
+    description: "",
+    points: 120,
+    assignmentGroup: "ASSIGNMENTS",
+    displayGradeAs: "Percentage",
+    submissionType: "Online",
+    due: "2025-05-13T23:59",
+    from: "2025-05-06T00:00",
+    until: "2025-05-20T23:59",
+  });
+
+  useEffect(() => {
+    if (assignment) {
+      setFormData({
+        title: assignment.title || "",
+        description: (assignment as any).description || "",
+        points: assignment.points || 120,
+        assignmentGroup: (assignment as any).assignmentGroup || "ASSIGNMENTS",
+        displayGradeAs: (assignment as any).displayGradeAs || "Percentage",
+        submissionType: (assignment as any).submissionType || "Online",
+        due: assignment.due || "2025-05-13T23:59",
+        from: assignment.from || "2025-05-06T00:00",
+        until: assignment.until || "2025-05-20T23:59",
+      });
+    }
+  }, [assignment]);
+
+  const handleSave = () => {
+    if (isNewAssignment) {
+      dispatch(addAssignment({
+        ...formData,
+        course: cid,
+      }));
+    } else {
+      dispatch(updateAssignment({
+        _id: aid,
+        ...formData,
+        course: cid,
+      }));
+    }
+    router.push(`/Courses/${cid}/Assignments`);
+  };
+
+  const handleCancel = () => {
+    router.push(`/Courses/${cid}/Assignments`);
+  };
+
   return (
     <div id="wd-assignments-editor" className="container mt-4">
       <Row className="mb-3">
@@ -18,7 +73,8 @@ export default function AssignmentEditor() {
             <Form.Control
               type="text"
               id="wd-name"
-              defaultValue={assignment ? assignment.title : "Assignment Name"}
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               size="lg"
             />
           </FormGroup>
@@ -28,21 +84,13 @@ export default function AssignmentEditor() {
       <Row className="mb-3">
         <Col>
           <Form.Group>
+            <Form.Label htmlFor="wd-description">Description</Form.Label>
             <Form.Control
               as="textarea"
               id="wd-description"
               rows={8}
-              defaultValue={`The assignment is available online.
-
-Submit a link to the landing page of your Web application running on Netlify.
-
-The landing page should include the following:
-• Your full name and section
-• Links to each of the lab assignments
-• Link to the Kambaz application
-• Links to all relevant source code repositories
-
-The Kanbas application should include a link to navigate back to the landing page.`}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </Form.Group>
         </Col>
@@ -56,7 +104,8 @@ The Kanbas application should include a link to navigate back to the landing pag
           <Form.Control
             type="number"
             id="wd-points"
-            defaultValue={assignment ? assignment.points : 120}
+            value={formData.points}
+            onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
           />
         </Col>
       </Row>
@@ -66,7 +115,11 @@ The Kanbas application should include a link to navigate back to the landing pag
           <Form.Label htmlFor="wd-group">Assignment Group</Form.Label>
         </Col>
         <Col md={9}>
-          <Form.Select id="wd-group" defaultValue="ASSIGNMENTS">
+          <Form.Select 
+            id="wd-group" 
+            value={formData.assignmentGroup}
+            onChange={(e) => setFormData({ ...formData, assignmentGroup: e.target.value })}
+          >
             <option value="ASSIGNMENTS">ASSIGNMENTS</option>
             <option value="REFLECTIONS">REFLECTIONS</option>
             <option value="QUIZZES">QUIZZES</option>
@@ -81,7 +134,11 @@ The Kanbas application should include a link to navigate back to the landing pag
           <Form.Label htmlFor="wd-display-grade-as">Display Grade as</Form.Label>
         </Col>
         <Col md={9}>
-          <Form.Select id="wd-display-grade-as" defaultValue="Percentage">
+          <Form.Select 
+            id="wd-display-grade-as" 
+            value={formData.displayGradeAs}
+            onChange={(e) => setFormData({ ...formData, displayGradeAs: e.target.value })}
+          >
             <option value="Percentage">Percentage</option>
             <option value="Complete/Incomplete">Complete/Incomplete</option>
             <option value="Points">Points</option>
@@ -98,7 +155,12 @@ The Kanbas application should include a link to navigate back to the landing pag
         </Col>
         <Col md={9}>
           <Card className="p-3">
-            <Form.Select id="wd-submission-type" className="mb-3" defaultValue="Online">
+            <Form.Select 
+              id="wd-submission-type" 
+              className="mb-3" 
+              value={formData.submissionType}
+              onChange={(e) => setFormData({ ...formData, submissionType: e.target.value })}
+            >
               <option value="Online">Online</option>
               <option value="No Submission">No Submission</option>
               <option value="On Paper">On Paper</option>
@@ -162,8 +224,8 @@ The Kanbas application should include a link to navigate back to the landing pag
                   <Form.Control
                     type="datetime-local"
                     id="wd-due-date"
-                    defaultValue={assignment ? assignment.due : "2025-05-13T23:59"}
-
+                    value={formData.due}
+                    onChange={(e) => setFormData({ ...formData, due: e.target.value })}
                   />
                 </Form.Group>
               </Col>
@@ -176,7 +238,8 @@ The Kanbas application should include a link to navigate back to the landing pag
                   <Form.Control
                     type="datetime-local"
                     id="wd-available-from"
-                    defaultValue={assignment ? assignment.from : "2025-05-06T00:00"}
+                    value={formData.from}
+                    onChange={(e) => setFormData({ ...formData, from: e.target.value })}
                   />
                 </Form.Group>
               </Col>
@@ -186,7 +249,8 @@ The Kanbas application should include a link to navigate back to the landing pag
                   <Form.Control
                     type="datetime-local"
                     id="wd-available-until"
-                    defaultValue={assignment ? assignment.until : "2025-05-20T23:59"}
+                    value={formData.until}
+                    onChange={(e) => setFormData({ ...formData, until: e.target.value })}
                   />
                 </Form.Group>
               </Col>
@@ -198,12 +262,12 @@ The Kanbas application should include a link to navigate back to the landing pag
       <hr />
 
       <div className="d-flex justify-content-end gap-2 mb-4">
-        <Link href={`/Courses/${cid}/Assignments`}>
-          <Button variant="secondary">Cancel </Button>
-        </Link>
-        <Link href={`/Courses/${cid}/Assignments`}>
-          <Button variant="danger">Save</Button>
-        </Link>
+        <Button variant="secondary" onClick={handleCancel}>
+          Cancel
+        </Button>
+        <Button variant="danger" onClick={handleSave}>
+          Save
+        </Button>
       </div>
     </div>    
   );

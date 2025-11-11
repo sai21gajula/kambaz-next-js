@@ -1,8 +1,30 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 import Link from "next/link";
-import { Form, Container } from "react-bootstrap";
+import { useRouter } from "next/navigation";
+import { setCurrentUser } from "../reducer";
+import { useDispatch } from "react-redux";
+import { useState } from "react";
+import * as db from "../../Database";
+import { FormControl, Button, Container } from "react-bootstrap";
 
 export default function Signin() {
+  const [credentials, setCredentials] = useState<any>({});
+  const dispatch = useDispatch();
+  const router = useRouter();
+
+  const signin = () => {
+    const user = db.users.find(
+      (u: any) =>
+        u.username === credentials.username &&
+        u.password === credentials.password
+    );
+    if (!user) return;
+    dispatch(setCurrentUser(user));
+    router.push("/Dashboard");
+  };
+
   return (
     <Container 
       id="wd-signin-screen" 
@@ -12,33 +34,37 @@ export default function Signin() {
       <div style={{ width: "350px" }}>
         <h3 className="mb-4">Sign in</h3>
         
-        <Form.Control 
+        <FormControl 
           id="wd-username"
           className="wd-username mb-2"
-          placeholder="username"
+          placeholder="e.g., iron_man"
           size="lg"
+          value={credentials.username || ""}
+          onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
         />
         
-        <Form.Control 
+        <FormControl 
           id="wd-password"
           className="wd-password mb-2 mt-1"
-          placeholder="password" 
+          placeholder="e.g., stark123" 
           type="password"
           size="lg"
+          value={credentials.password || ""}
+          onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
         />
         
-        <Link 
+        <Button 
           id="wd-signin-btn"
-          href="/Dashboard"
-          className="btn btn-primary w-100 mb-2 mt-2 text-decoration-none"
-          style={{ display: "inline-block" }}>
+          onClick={signin}
+          className="w-100 mb-2 mt-2">
           Sign in
+        </Button>
+
         <Link 
           id="wd-signup-link" 
           href="Signup"
-          className="text-decoration-underline text-primary ">
+          className="text-decoration-underline text-primary">
           Sign up
-        </Link>
         </Link>
       </div>
     </Container>

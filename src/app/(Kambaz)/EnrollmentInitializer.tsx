@@ -1,4 +1,6 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setEnrollments } from "./Enrollments/reducer";
@@ -12,3 +14,4 @@ export default function EnrollmentInitializer() {
   }, [dispatch]);
 
   return null;
+}

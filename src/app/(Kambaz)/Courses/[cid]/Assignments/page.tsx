@@ -7,7 +7,7 @@ import { BsGripVertical } from "react-icons/bs";
 import { FaPlus, FaTrash, FaPencil } from "react-icons/fa6";
 import { IoEllipsisVertical, IoChevronDown } from "react-icons/io5";
 import { FaFileAlt, FaCheckCircle } from "react-icons/fa";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteAssignment } from "./reducer";
 import { RootState } from "../../../store";
@@ -15,7 +15,6 @@ import { useState } from "react";
 
 export default function Assignments() {
   const { cid } = useParams();
-  const router = useRouter();
   const dispatch = useDispatch();
   const { assignments } = useSelector((state: RootState) => state.assignmentsReducer);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -120,7 +119,7 @@ export default function Assignments() {
           <Modal.Title>Delete Assignment</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Are you sure you want to delete "{selectedAssignment?.title}"?
+          Are you sure you want to delete &quot;{selectedAssignment?.title}&quot;?
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>

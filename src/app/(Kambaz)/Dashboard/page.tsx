@@ -9,12 +9,22 @@ import * as db from "../Database";
 
 export default function Dashboard() {
   const { courses } = useSelector((state: RootState) => state.coursesReducer);
+  const { currentUser } = useSelector((state: RootState) => state.accountReducer);
+  const { enrollments } = db;
   const dispatch = useDispatch();
   const [course, setCourse] = useState<any>({
     _id: "0", name: "New Course", number: "New Number",
     startDate: "2023-09-10", endDate: "2023-12-15",
     image: "/images/reactjs.jpg", description: "New Description"
   });
+
+  const enrolledCourses = currentUser ? courses.filter((course) =>
+    enrollments.some(
+      (enrollment: any) =>
+        enrollment.user === (currentUser as any)._id &&
+        enrollment.course === course._id
+    )
+  ) : [];
 
   return (
     <div id="wd-dashboard">
@@ -41,11 +51,11 @@ export default function Dashboard() {
           onChange={(e) => setCourse({ ...course, description: e.target.value })} />
       </div>
       <hr />
-      <h2 id="wd-dashboard-published">Published Courses ({courses.length})</h2> <hr />
+      <h2 id="wd-dashboard-published">Published Courses ({enrolledCourses.length})</h2> <hr />
       <div id="wd-dashboard-courses">
 
         <Row xs={1} sm={2} md={5} lg={6} className="g-4">
-        {courses.map((course) => (
+        {enrolledCourses.map((course) => (
           <Col key={course._id} className="wd-dashboard-course" style={{ width: "300px" }}>
               <Card>
                 <Link href={`/Courses/${course._id}/Home`}       

@@ -1,20 +1,7 @@
 import { Modal, FormControl, Button } from "react-bootstrap";
 
-export default function ModuleEditor({ 
-  show, 
-  handleClose, 
-  dialogTitle, 
-  moduleName, 
-  setModuleName, 
-  addModule,
-}: {
-  show: boolean; 
-  handleClose: () => void; 
-  dialogTitle: string; 
-  moduleName: string; 
-  setModuleName: (name: string) => void;
-  addModule: () => void; 
-}) {
+export default function ModuleEditor({ show, handleClose, dialogTitle, moduleName, setModuleName, addModule,}: {
+  show: boolean; handleClose: () => void; dialogTitle: string; moduleName: string; setModuleName: (name: string) => void; addModule: () => void; }) {
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>

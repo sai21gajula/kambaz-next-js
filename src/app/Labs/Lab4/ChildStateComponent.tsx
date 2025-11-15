@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 export default function ChildStateComponent({
  counter,
  setCounter

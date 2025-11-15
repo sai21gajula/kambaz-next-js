@@ -5,11 +5,13 @@ import KambazNavigation from "./Navigation";
 import "./styles.css";
 import store from "./store";
 import { Provider } from "react-redux";
+import EnrollmentInitializer from "./EnrollmentInitializer";
 // import "./globals.css"; 
 
 export default function KambazLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <Provider store={store}>
+      <EnrollmentInitializer />
       <div id="wd-kambaz">
         <div className="d-flex">
           <div>

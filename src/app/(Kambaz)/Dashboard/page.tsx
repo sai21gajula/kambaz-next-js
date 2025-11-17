@@ -7,7 +7,8 @@ import { Card,CardImg,CardBody, CardTitle, Row,CardText, Col, Button, FormContro
 import { useDispatch, useSelector } from "react-redux";
 import { addNewCourse, deleteCourse, updateCourse, setCourses } from "../Courses/reducer";
 import * as client from "../Courses/client";
-import { enrollUserInCourse, unenrollUserFromCourse } from "../Enrollments/reducer";
+import { enrollUserInCourse, unenrollUserFromCourse, setEnrollments } from "../Enrollments/reducer";
+import * as enrollmentClient from "../Enrollments/client";
 import { RootState } from "../store";
  
 
@@ -25,15 +26,29 @@ export default function Dashboard() {
 
   const fetchCourses = async () => {
     try {
-      const courses = await client.findMyCourses();
-      dispatch(setCourses(courses));
+      // Always fetch all courses and filter on frontend
+      const allCourses = await client.fetchAllCourses();
+      dispatch(setCourses(allCourses));
     } catch (error) {
       console.error(error);
     }
   };
 
+  const fetchEnrollments = async () => {
+    if (!currentUser) return;
+    try {
+      const userEnrollments = await enrollmentClient.findEnrollmentsForUser(
+        (currentUser as any)._id
+      );
+      dispatch(setEnrollments(userEnrollments));
+    } catch (error) {
+      console.error("Failed to fetch enrollments:", error);
+    }
+  };
+
   useEffect(() => {
     fetchCourses();
+    fetchEnrollments();
   }, [currentUser]);
 
   const isEnrolled = (courseId: string) => {
@@ -45,14 +60,32 @@ export default function Dashboard() {
     );
   };
 
-  const handleEnroll = (courseId: string) => {
+  const handleEnroll = async (courseId: string) => {
     if (!currentUser) return;
-    dispatch(enrollUserInCourse({ userId: (currentUser as any)._id, courseId }));
+    try {
+      const newEnrollment = await enrollmentClient.enrollUserInCourse(
+        (currentUser as any)._id,
+        courseId
+      );
+      dispatch(enrollUserInCourse(newEnrollment));
+    } catch (error) {
+      console.error("Failed to enroll:", error);
+    }
   };
 
-  const handleUnenroll = (courseId: string) => {
+  const handleUnenroll = async (courseId: string) => {
     if (!currentUser) return;
-    dispatch(unenrollUserFromCourse({ userId: (currentUser as any)._id, courseId }));
+    try {
+      const enrollment = enrollments.find(
+        (e: any) => e.user === (currentUser as any)._id && e.course === courseId
+      );
+      if (enrollment) {
+        await enrollmentClient.unenrollUserFromCourse((enrollment as any)._id);
+        dispatch(unenrollUserFromCourse((enrollment as any)._id));
+      }
+    } catch (error) {
+      console.error("Failed to unenroll:", error);
+    }
   };
 
   const addCourse = () => {
@@ -99,7 +132,17 @@ export default function Dashboard() {
     }
   };
 
-  const displayedCourses = courses || [];
+  // Filter enrolled courses
+  const enrolledCourses = currentUser ? courses.filter((course: any) =>
+    enrollments.some(
+      (enrollment: any) =>
+        enrollment.user === (currentUser as any)._id &&
+        enrollment.course === course._id
+    )
+  ) : [];
+
+  // Display all courses or only enrolled courses based on toggle
+  const displayedCourses = showAllCourses ? courses : enrolledCourses;
 
   return (
     <div id="wd-dashboard">

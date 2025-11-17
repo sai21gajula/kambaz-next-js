@@ -1,31 +1,19 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { assignments } from "../../../Database";
-import { v4 as uuidv4 } from "uuid";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 const initialState = {
-  assignments: assignments,
+  assignments: [] as any[],
 };
 
 const assignmentsSlice = createSlice({
   name: "assignments",
   initialState,
   reducers: {
+    setAssignments: (state, { payload: assignments }) => {
+      state.assignments = assignments as any;
+    },
     addAssignment: (state, { payload: assignment }) => {
-      const newAssignment: any = {
-        _id: uuidv4(),
-        title: assignment.title,
-        description: assignment.description,
-        course: assignment.course,
-        points: assignment.points,
-        assignmentGroup: assignment.assignmentGroup,
-        displayGradeAs: assignment.displayGradeAs,
-        submissionType: assignment.submissionType,
-        due: assignment.due,
-        from: assignment.from,
-        until: assignment.until,
-      };
-      state.assignments = [...state.assignments, newAssignment] as any;
+      state.assignments = [...state.assignments, assignment] as any;
     },
     deleteAssignment: (state, { payload: assignmentId }) => {
       state.assignments = state.assignments.filter(
@@ -45,6 +33,6 @@ const assignmentsSlice = createSlice({
   },
 });
 
-export const { addAssignment, deleteAssignment, updateAssignment, editAssignment } =
+export const { setAssignments, addAssignment, deleteAssignment, updateAssignment, editAssignment } =
   assignmentsSlice.actions;
 export default assignmentsSlice.reducer;

@@ -1,13 +1,13 @@
 "use client"
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Form, Button, Row, Col, Card, FormGroup } from "react-bootstrap";
+import { Form, Button, Row, Col, Card, FormGroup, Alert, Spinner } from "react-bootstrap";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addAssignment, updateAssignment } from "../reducer";
+import { addAssignment, updateAssignment, setAssignments } from "../reducer";
 import { RootState } from "../../../../store";
+import * as client from "../client";
 
 export default function AssignmentEditor() {
   const { cid, aid } = useParams();
@@ -28,6 +28,22 @@ export default function AssignmentEditor() {
     from: "2025-05-06T00:00",
     until: "2025-05-20T23:59",
   });
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const normalizeDateTime = (value?: string) => {
+    if (!value) {
+      return "";
+    }
+    if (value.endsWith("Z")) {
+      const date = new Date(value);
+      const tzOffset = date.getTimezoneOffset();
+      const local = new Date(date.getTime() - tzOffset * 60000);
+      return local.toISOString().slice(0, 16);
+    }
+    return value.slice(0, 16);
+  };
 
   useEffect(() => {
     if (assignment) {
@@ -38,27 +54,61 @@ export default function AssignmentEditor() {
         assignmentGroup: (assignment as any).assignmentGroup || "ASSIGNMENTS",
         displayGradeAs: (assignment as any).displayGradeAs || "Percentage",
         submissionType: (assignment as any).submissionType || "Online",
-        due: assignment.due || "2025-05-13T23:59",
-        from: assignment.from || "2025-05-06T00:00",
-        until: assignment.until || "2025-05-20T23:59",
+        due: normalizeDateTime(assignment.due) || "2025-05-13T23:59",
+        from: normalizeDateTime(assignment.from) || "2025-05-06T00:00",
+        until: normalizeDateTime(assignment.until) || "2025-05-20T23:59",
       });
     }
   }, [assignment]);
 
-  const handleSave = () => {
-    if (isNewAssignment) {
-      dispatch(addAssignment({
-        ...formData,
-        course: cid,
-      }));
-    } else {
-      dispatch(updateAssignment({
-        _id: aid,
-        ...formData,
-        course: cid,
-      }));
+  useEffect(() => {
+    if (!cid || isNewAssignment || assignment) {
+      return;
     }
-    router.push(`/Courses/${cid}/Assignments`);
+    const loadAssignments = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await client.fetchAssignmentsForCourse(cid as string);
+        dispatch(setAssignments(data));
+      } catch (err) {
+        console.error("Failed to load assignment", err);
+        setError("Could not load assignments from server.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadAssignments();
+  }, [assignment, cid, dispatch, isNewAssignment]);
+
+  const handleSave = async () => {
+    if (!cid) {
+      return;
+    }
+    setSaving(true);
+    setError(null);
+    try {
+      if (isNewAssignment) {
+        const created = await client.createAssignmentForCourse(cid as string, {
+          ...formData,
+          course: cid,
+        });
+        dispatch(addAssignment(created));
+      } else {
+        const updated = await client.updateAssignment({
+          _id: aid,
+          ...formData,
+          course: cid,
+        });
+        dispatch(updateAssignment(updated));
+      }
+      router.push(`/Courses/${cid}/Assignments`);
+    } catch (err) {
+      console.error("Failed to save assignment", err);
+      setError("Failed to save assignment. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancel = () => {
@@ -67,6 +117,17 @@ export default function AssignmentEditor() {
 
   return (
     <div id="wd-assignments-editor" className="container mt-4">
+      {error && (
+        <Alert variant="danger" onClose={() => setError(null)} dismissible>
+          {error}
+        </Alert>
+      )}
+      {loading && !assignment && !isNewAssignment ? (
+        <div className="d-flex justify-content-center my-5">
+          <Spinner animation="border" role="status" />
+        </div>
+      ) : (
+        <>
       <Row className="mb-3">
         <Col>
           <FormGroup>
@@ -263,13 +324,15 @@ export default function AssignmentEditor() {
       <hr />
 
       <div className="d-flex justify-content-end gap-2 mb-4">
-        <Button variant="secondary" onClick={handleCancel}>
+        <Button variant="secondary" onClick={handleCancel} disabled={saving}>
           Cancel
         </Button>
-        <Button variant="danger" onClick={handleSave}>
-          Save
+        <Button variant="danger" onClick={handleSave} disabled={saving}>
+          {saving ? "Saving..." : "Save"}
         </Button>
       </div>
+      </>
+      )}
     </div>    
   );
 }

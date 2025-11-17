@@ -2,16 +2,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import Link from "next/link";
-import { ListGroup, ListGroupItem, Button, Form, Modal } from "react-bootstrap";
+import { ListGroup, ListGroupItem, Button, Form, Modal, Alert, Spinner } from "react-bootstrap";
 import { BsGripVertical } from "react-icons/bs";
 import { FaPlus, FaTrash, FaPencil } from "react-icons/fa6";
 import { IoEllipsisVertical, IoChevronDown } from "react-icons/io5";
 import { FaFileAlt, FaCheckCircle } from "react-icons/fa";
 import { useParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteAssignment } from "./reducer";
+import { deleteAssignment, setAssignments } from "./reducer";
 import { RootState } from "../../../store";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import * as client from "./client";
 
 export default function Assignments() {
   const { cid } = useParams();
@@ -19,15 +20,45 @@ export default function Assignments() {
   const { assignments } = useSelector((state: RootState) => state.assignmentsReducer);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!cid) {
+      return;
+    }
+    const loadAssignments = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await client.fetchAssignmentsForCourse(cid as string);
+        dispatch(setAssignments(data));
+      } catch (err) {
+        console.error("Failed to load assignments", err);
+        setError("Could not load assignments from server.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadAssignments();
+  }, [cid, dispatch]);
 
   const handleDeleteClick = (assignment: any) => {
     setSelectedAssignment(assignment);
     setShowDeleteModal(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (selectedAssignment) {
+  const handleConfirmDelete = async () => {
+    if (!selectedAssignment) {
+      return;
+    }
+    try {
+      await client.deleteAssignment(selectedAssignment._id);
       dispatch(deleteAssignment(selectedAssignment._id));
+    } catch (err) {
+      console.error("Failed to delete assignment", err);
+      setError("Failed to delete assignment. Please try again.");
+    } finally {
       setShowDeleteModal(false);
       setSelectedAssignment(null);
     }
@@ -57,6 +88,12 @@ export default function Assignments() {
         </div>
       </div>
       
+      {error && (
+        <Alert variant="danger" onClose={() => setError(null)} dismissible>
+          {error}
+        </Alert>
+      )}
+
       <ListGroup className="rounded-0">
         <ListGroupItem className="wd-assignment-group p-0 mb-0 fs-5 border-gray">
           <div className="wd-assignment-header p-3 ps-2 bg-secondary d-flex justify-content-between align-items-center">
@@ -73,9 +110,14 @@ export default function Assignments() {
           </div>
           
           <ListGroup className="rounded-0">
-            {assignments
-            .filter((assignment: any) => assignment.course === cid)
-            .map((assignment: any) => (
+            {loading ? (
+              <ListGroupItem className="p-4 d-flex justify-content-center">
+                <Spinner animation="border" role="status" />
+              </ListGroupItem>
+            ) : (
+              assignments
+                .filter((assignment: any) => assignment.course === cid)
+                .map((assignment: any) => (
               <ListGroupItem key={assignment._id} className="wd-assignment-item p-3 ps-1 d-flex align-items-start">
                 <BsGripVertical className="me-2 fs-3 mt-1" />
                 <FaFileAlt className="me-2 mt-1 text-success" />
@@ -86,11 +128,11 @@ export default function Assignments() {
                   <div className="text-muted small mt-1">
                     <span className="text-danger">Multiple Modules</span>
                     <span className="mx-1">|</span>
-                    <span><strong>Not available until</strong> {new Date(assignment.until).toLocaleString()}</span>
+                    <span><strong>Not available until</strong> {assignment.until ? new Date(assignment.until).toLocaleString() : "N/A"}</span>
                     <span className="mx-1">|</span>
-                    <span><strong>Due</strong> {new Date(assignment.due).toLocaleString()}</span>
+                    <span><strong>Due</strong> {assignment.due ? new Date(assignment.due).toLocaleString() : "N/A"}</span>
                     <span className="mx-1">|</span>
-                    <span>{assignment.points} pts</span>
+                    <span>{assignment.points ?? 0} pts</span>
                   </div>
                 </div>
                  <div className="d-flex align-items-center gap-2">
@@ -109,7 +151,8 @@ export default function Assignments() {
                   <IoEllipsisVertical className="fs-4" />
               </div>
               </ListGroupItem>
-            ))}
+            ))
+            )}
           </ListGroup>
         </ListGroupItem>
       </ListGroup>

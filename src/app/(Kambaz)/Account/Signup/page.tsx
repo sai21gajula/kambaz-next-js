@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { useState } from "react";
 import { Form, Container, Button } from "react-bootstrap";
 import * as client from "../client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export default function Signup() {
   const [user, setUser] = useState<any>({});

@@ -1,14 +1,15 @@
 'use client';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Card,CardImg,CardBody, CardTitle, Row,CardText, Col, Button, FormControl } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { addNewCourse, deleteCourse, updateCourse } from "../Courses/reducer";
+import { addNewCourse, deleteCourse, updateCourse, setCourses } from "../Courses/reducer";
+import * as client from "../Courses/client";
 import { enrollUserInCourse, unenrollUserFromCourse } from "../Enrollments/reducer";
 import { RootState } from "../store";
-import * as db from "../Database";
+ 
 
 export default function Dashboard() {
   const { courses } = useSelector((state: RootState) => state.coursesReducer);
@@ -22,7 +23,19 @@ export default function Dashboard() {
   });
   const [showAllCourses, setShowAllCourses] = useState(false);
 
-  // Helper function to check if user is enrolled
+  const fetchCourses = async () => {
+    try {
+      const courses = await client.findMyCourses();
+      dispatch(setCourses(courses));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCourses();
+  }, [currentUser]);
+
   const isEnrolled = (courseId: string) => {
     if (!currentUser) return false;
     return enrollments.some(
@@ -32,13 +45,11 @@ export default function Dashboard() {
     );
   };
 
-  // Helper function to handle enrollment
   const handleEnroll = (courseId: string) => {
     if (!currentUser) return;
     dispatch(enrollUserInCourse({ userId: (currentUser as any)._id, courseId }));
   };
 
-  // Helper function to handle unenrollment
   const handleUnenroll = (courseId: string) => {
     if (!currentUser) return;
     dispatch(unenrollUserFromCourse({ userId: (currentUser as any)._id, courseId }));
@@ -46,7 +57,6 @@ export default function Dashboard() {
 
   const addCourse = () => {
     dispatch(addNewCourse(course));
-    // Reset form after adding
     setCourse({
       _id: "0", name: "New Course", number: "New Number",
       startDate: "2023-09-10", endDate: "2023-12-15",
@@ -54,20 +64,43 @@ export default function Dashboard() {
     });
   };
 
+  const onAddNewCourse = async () => {
+    try {
+      const newCourse = await client.createCourse(course);
+      dispatch(setCourses([...(courses || []), newCourse]));
+      setCourse({
+        _id: "0", name: "New Course", number: "New Number",
+        startDate: "2023-09-10", endDate: "2023-12-15",
+        image: "/images/reactjs.png", description: "New Description"
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const updateExistingCourse = () => {
     dispatch(updateCourse(course));
   };
 
-  const enrolledCourses = currentUser ? courses.filter((course) =>
-    enrollments.some(
-      (enrollment: any) =>
-        enrollment.user === (currentUser as any)._id &&
-        enrollment.course === course._id
-    )
-  ) : [];
+  const onUpdateCourse = async () => {
+    try {
+      const updated = await client.updateCourse(course);
+      dispatch(setCourses((courses || []).map((c: any) => (c._id === updated._id ? updated : c))));
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-  // Display all courses or only enrolled courses based on toggle
-  const displayedCourses = showAllCourses ? courses : enrolledCourses;
+  const onDeleteCourse = async (courseId: string) => {
+    try {
+      const status = await client.deleteCourse(courseId);
+      dispatch(setCourses((courses || []).filter((c: any) => c._id !== courseId)));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const displayedCourses = courses || [];
 
   return (
     <div id="wd-dashboard">
@@ -75,14 +108,14 @@ export default function Dashboard() {
       
       {currentUser && (currentUser as any).role === "FACULTY" && (
         <>
-          <h5>New Course
-            <button className="btn btn-warning float-end me-2"
-                    id="wd-update-course-click"
-                    onClick={updateExistingCourse}> Update </button>
-            <button className="btn btn-primary float-end me-2"
-                    id="wd-add-new-course-click"
-                    onClick={addCourse}> Add </button>
-          </h5>
+              <h5>New Course
+              <button className="btn btn-warning float-end me-2"
+                id="wd-update-course-click"
+                onClick={onUpdateCourse}> Update </button>
+              <button className="btn btn-primary float-end me-2"
+                id="wd-add-new-course-click"
+                onClick={onAddNewCourse}> Add </button>
+            </h5>
           <div className="mb-3">
             <FormControl 
               value={course.name} 
@@ -112,7 +145,7 @@ export default function Dashboard() {
       <div id="wd-dashboard-courses">
 
         <Row xs={1} sm={2} md={5} lg={6} className="g-4">
-        {displayedCourses.map((course) => (
+        {displayedCourses.map((course: any) => (
           <Col key={course._id} className="wd-dashboard-course" style={{ width: "300px" }}>
               <Card>
                 <Link href={`/Courses/${course._id}/Home`}       
@@ -124,7 +157,6 @@ export default function Dashboard() {
                   <CardText className="wd-dashboard-course-description overflow-hidden" style={{ height: "100px" }}>
                     {course.description} </CardText>
                 
-                {/* First row: Go button and Faculty buttons */}
                 <div className="mb-2">
                   <Button variant="primary"> Go </Button>
                   
@@ -146,7 +178,7 @@ export default function Dashboard() {
                         id="wd-delete-course-click"
                         onClick={(event) => {
                           event.preventDefault();
-                          dispatch(deleteCourse(course._id));
+                          onDeleteCourse(course._id);
                         }}>
                         Delete
                       </Button>
@@ -154,7 +186,6 @@ export default function Dashboard() {
                   )}
                 </div>
                 
-                {/* Second row: Enroll/Unenroll button */}
                 {currentUser && (
                   <div className="d-grid">
                     {isEnrolled(course._id) ? (

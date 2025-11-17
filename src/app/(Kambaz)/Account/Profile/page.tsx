@@ -4,6 +4,7 @@ import { redirect } from "next/dist/client/components/navigation";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setCurrentUser } from "../reducer";
+import * as client from "../client";
 import { RootState } from "../../store";
 import { Button, FormControl } from "react-bootstrap";
 
@@ -17,9 +18,23 @@ export default function Profile() {
     setProfile(currentUser);
   };
 
-  const signout = () => {
+  const signout = async () => {
+    try {
+      await client.signout();
+    } catch (error: any) {
+      console.error("Signout failed:", error?.response?.data || error);
+    }
     dispatch(setCurrentUser(null));
     redirect("/Account/Signin");
+  };
+
+  const updateProfile = async () => {
+    try {
+      const updatedProfile = await client.updateUser(profile);
+      dispatch(setCurrentUser(updatedProfile));
+    } catch (error: any) {
+      console.error("Update failed:", error?.response?.data || error);
+    }
   };
 
   useEffect(() => {
@@ -78,7 +93,10 @@ export default function Profile() {
             <option value="FACULTY">Faculty</option>
             <option value="STUDENT">Student</option>
           </select>
-          <Button onClick={signout} className="w-100 mb-2" id="wd-signout-btn">
+          <Button onClick={updateProfile} className="w-100 mb-2" id="wd-update-profile-btn">
+            Update
+          </Button>
+          <Button onClick={signout} className="wd-signout-btn btn btn-danger w-100">
             Sign out
           </Button>
         </div>

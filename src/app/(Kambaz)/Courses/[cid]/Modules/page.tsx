@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @next/next/no-assign-module-variable */
 "use client"
 import { useState, useEffect } from "react";
 import ListGroup from "react-bootstrap/esm/ListGroup";
@@ -29,6 +30,7 @@ export default function Modules() {
   const onCreateModuleForCourse = async () => {
     if (!cid) return;
     const newModule = { name: moduleName, course: cid };
+    // eslint-disable-next-line @next/next/no-assign-module-variable
     const module = await client.createModuleForCourse(cid as string, newModule);
     dispatch(setModules([...modules, module ]));
     setModuleName("");
@@ -37,6 +39,7 @@ export default function Modules() {
 
   const onUpdateModule = async (module: any) => {
       const updated = await client.updateModule(module);
+      /* eslint-disable-next-line @next/next/no-assign-module-variable */
       const newModules = modules.map((m: any) => (m._id === updated._id ? updated : m));
       dispatch(setModules(newModules));
  

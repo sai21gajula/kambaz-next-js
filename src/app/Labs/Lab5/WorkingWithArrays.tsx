@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { FormControl, Row, Col } from "react-bootstrap";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
 export default function WorkingWithArrays() {

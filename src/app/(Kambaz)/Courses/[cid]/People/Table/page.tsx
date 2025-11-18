@@ -27,31 +27,25 @@ export default function PeopleTable() {
   const { cid } = useParams();
   const dispatch = useDispatch();
   
-  // Get users from Redux (loaded from backend)
   const { users } = useSelector((state: RootState) => state.usersReducer);
   const { currentUser } = useSelector((state: RootState) => state.accountReducer);
   const { enrollments } = useSelector((state: RootState) => state.enrollmentsReducer);
   
-  // Modal and edit state
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingUser, setEditingUser] = useState<EditingUser | null>(null);
   const [formData, setFormData] = useState<EditingUser | null>(null);
   
-  // Add user state
   const [addUsername, setAddUsername] = useState("");
   const [addUserLoading, setAddUserLoading] = useState(false);
   const [addUserError, setAddUserError] = useState("");
   
-  // Fetch users enrolled in this course when component mounts
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch only users in this specific course
         const courseUsers = await usersClient.findUsersInCourse(cid as string);
         dispatch(setUsers(courseUsers));
       } catch (error) {
         console.error("Failed to fetch course users:", error);
-        // Fallback to local data filtered by course enrollment
         const courseEnrollments = db.enrollments.filter((e: any) => e.course === cid);
         const enrolledUserIds = courseEnrollments.map((e: any) => e.user);
         const filteredUsers = db.users.filter((u: any) => enrolledUserIds.includes(u._id));
@@ -82,7 +76,6 @@ export default function PeopleTable() {
       const updatedUser = await usersClient.updateUser(formData);
       dispatch(updateUser(updatedUser));
       
-      // If editing current user's own profile, update the session
       if (currentUser && updatedUser._id === (currentUser as any)._id) {
         dispatch(setCurrentUser(updatedUser));
       }
@@ -98,15 +91,12 @@ export default function PeopleTable() {
   const handleDeleteClick = async (userId: string) => {
     if (window.confirm("Are you sure you want to unenroll this user from the course?")) {
       try {
-        // Find the enrollment for this user in this course
         const enrollment = enrollments.find(
           (e: any) => e.user === userId && e.course === cid
         );
         
         if (enrollment) {
-          // Unenroll the user from the course (remove enrollment, not the user)
           await enrollmentClient.unenrollUserFromCourse((enrollment as any)._id);
-          // Remove from the people table display
           dispatch(deleteUser(userId));
         }
       } catch (error) {
@@ -127,12 +117,10 @@ export default function PeopleTable() {
     try {
       let foundUser = null;
 
-      // Try to find user by username from API
       try {
         foundUser = await usersClient.findUserByUsername(addUsername);
       } catch (apiError) {
         console.error("API search failed, trying local database:", apiError);
-        // Fallback: Search in local database
         foundUser = db.users.find((u: any) => u.username === addUsername);
       }
 
@@ -142,7 +130,6 @@ export default function PeopleTable() {
         return;
       }
 
-      // Check if user is already enrolled
       const alreadyEnrolled = enrollments.some(
         (e: any) => e.user === foundUser._id && e.course === cid
       );
@@ -153,16 +140,13 @@ export default function PeopleTable() {
         return;
       }
 
-      // Enroll the user in the course
       const newEnrollment = await enrollmentClient.enrollUserInCourse(
         foundUser._id,
         cid as string
       );
 
-      // Add user to the people table
       dispatch(addUser(foundUser));
 
-      // Clear the input
       setAddUsername("");
       setAddUserError("");
     } catch (error) {

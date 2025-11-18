@@ -35,12 +35,10 @@ export default function Dashboard() {
   };
 
   const fetchEnrollments = async () => {
-    if (!currentUser) return;
     try {
-      const userEnrollments = await enrollmentClient.findEnrollmentsForUser(
-        (currentUser as any)._id
-      );
-      dispatch(setEnrollments(userEnrollments));
+      // Fetch ALL enrollments so People table and other components can see all students
+      const allEnrollments = await enrollmentClient.findAllEnrollments();
+      dispatch(setEnrollments(allEnrollments));
     } catch (error) {
       console.error("Failed to fetch enrollments:", error);
     }

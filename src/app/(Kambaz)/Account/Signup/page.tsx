@@ -18,7 +18,7 @@ export default function Signup() {
       const currentUser = await client.signup(user);
       if (!currentUser) return;
       dispatch(setCurrentUser(currentUser));
-      router.push("/Profile");
+      router.push("/Account/Profile");
     } catch (error: any) {
       console.error("Signup failed:", error?.response?.data || error);
     }

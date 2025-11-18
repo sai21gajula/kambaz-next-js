@@ -25,14 +25,12 @@ const enrollmentsSlice = createSlice({
       state,
       action: PayloadAction<Enrollment>
     ) => {
-      // Accept full enrollment object from API (includes _id)
       state.enrollments = [...state.enrollments, action.payload];
     },
     unenrollUserFromCourse: (
       state,
       action: PayloadAction<string>
     ) => {
-      // Accept enrollment ID to remove
       const enrollmentId = action.payload;
       state.enrollments = state.enrollments.filter(
         (enrollment) => enrollment._id !== enrollmentId

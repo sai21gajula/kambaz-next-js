@@ -5,7 +5,6 @@ import KambazNavigation from "./Navigation";
 import "./styles.css";
 import store from "./store";
 import { Provider } from "react-redux";
-import EnrollmentInitializer from "./EnrollmentInitializer";
 import Session from "./Account/Session";
 // import "./globals.css"; 
 
@@ -13,7 +12,6 @@ export default function KambazLayout({ children }: Readonly<{ children: ReactNod
   return (
     <Provider store={store}>
       <Session>
-        <EnrollmentInitializer />
         <div id="wd-kambaz">
           <div className="d-flex">
             <div>

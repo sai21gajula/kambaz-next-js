@@ -19,6 +19,8 @@ export default function Modules() {
   const { cid } = useParams();
   const [moduleName, setModuleName] = useState("");
   const { modules } = useSelector((state: RootState) => state.modulesReducer);
+  const { currentUser } = useSelector((state: RootState) => state.accountReducer);
+  const isInstructor = !!(currentUser && (["FACULTY","ADMIN"].includes((currentUser as any).role)));
   const dispatch = useDispatch();
   
   const onRemoveModule = async (moduleId: string) => {
@@ -61,6 +63,7 @@ export default function Modules() {
         moduleName={moduleName} 
         setModuleName={setModuleName} 
         addModule={onCreateModuleForCourse}
+        isInstructor={isInstructor}
       />
       <br /><br /><br /><br />
   <ListGroup id="wd-modules" className="rounded-0">
@@ -92,6 +95,7 @@ export default function Modules() {
                   editModule={(moduleId) => {
                     dispatch(editModule(moduleId));
                   }}
+                  isInstructor={isInstructor}
                 />
               </div>
               {module.lessons && (

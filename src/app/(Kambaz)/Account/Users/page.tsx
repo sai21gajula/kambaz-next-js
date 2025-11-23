@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import PeopleTable from "../../Courses/[cid]/People/Table";
 import * as client from "../client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export default function Users() {
   const [users, setUsers] = useState<any[]>([]);

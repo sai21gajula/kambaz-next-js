@@ -14,6 +14,8 @@ export default function AssignmentEditor() {
   const router = useRouter();
   const dispatch = useDispatch();
   const { assignments } = useSelector((state: RootState) => state.assignmentsReducer);
+  const { currentUser } = useSelector((state: RootState) => state.accountReducer);
+  const isInstructor = !!(currentUser && (["FACULTY","ADMIN"].includes((currentUser as any).role)));
   const assignment = assignments.find((a: any) => a._id === aid);
   const isNewAssignment = aid === "new";
 
@@ -115,11 +117,23 @@ export default function AssignmentEditor() {
     router.push(`/Courses/${cid}/Assignments`);
   };
 
+  // Redirect students trying to create new assignment
+  useEffect(() => {
+    if (isNewAssignment && !isInstructor) {
+      router.push(`/Courses/${cid}/Assignments`);
+    }
+  }, [isNewAssignment, isInstructor, cid, router]);
+
   return (
     <div id="wd-assignments-editor" className="container mt-4">
       {error && (
         <Alert variant="danger" onClose={() => setError(null)} dismissible>
           {error}
+        </Alert>
+      )}
+      {!isInstructor && (
+        <Alert variant="info" className="mb-3">
+          <strong>View Only:</strong> Students can only view assignments. Only instructors can edit assignments.
         </Alert>
       )}
       {loading && !assignment && !isNewAssignment ? (
@@ -138,6 +152,7 @@ export default function AssignmentEditor() {
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               size="lg"
+              disabled={!isInstructor}
             />
           </FormGroup>
         </Col>
@@ -153,6 +168,7 @@ export default function AssignmentEditor() {
               rows={8}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              disabled={!isInstructor}
             />
           </Form.Group>
         </Col>
@@ -168,6 +184,7 @@ export default function AssignmentEditor() {
             id="wd-points"
             value={formData.points}
             onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
+            disabled={!isInstructor}
           />
         </Col>
       </Row>
@@ -181,6 +198,7 @@ export default function AssignmentEditor() {
             id="wd-group" 
             value={formData.assignmentGroup}
             onChange={(e) => setFormData({ ...formData, assignmentGroup: e.target.value })}
+            disabled={!isInstructor}
           >
             <option value="ASSIGNMENTS">ASSIGNMENTS</option>
             <option value="REFLECTIONS">REFLECTIONS</option>
@@ -200,6 +218,7 @@ export default function AssignmentEditor() {
             id="wd-display-grade-as" 
             value={formData.displayGradeAs}
             onChange={(e) => setFormData({ ...formData, displayGradeAs: e.target.value })}
+            disabled={!isInstructor}
           >
             <option value="Percentage">Percentage</option>
             <option value="Complete/Incomplete">Complete/Incomplete</option>
@@ -222,6 +241,7 @@ export default function AssignmentEditor() {
               className="mb-3" 
               value={formData.submissionType}
               onChange={(e) => setFormData({ ...formData, submissionType: e.target.value })}
+              disabled={!isInstructor}
             >
               <option value="Online">Online</option>
               <option value="No Submission">No Submission</option>
@@ -236,6 +256,7 @@ export default function AssignmentEditor() {
                 id="wd-text-entry"
                 label="Text Entry"
                 className="mb-2"
+                disabled={!isInstructor}
               />
               <Form.Check
                 type="checkbox"
@@ -243,23 +264,27 @@ export default function AssignmentEditor() {
                 label="Website URL"
                 className="mb-2"
                 defaultChecked
+                disabled={!isInstructor}
               />
               <Form.Check
                 type="checkbox"
                 id="wd-media-recordings"
                 label="Media Recordings"  
                 className="mb-2"
+                disabled={!isInstructor}
               />
               <Form.Check
                 type="checkbox"
                 id="wd-student-annotation"
                 label="Student Annotation"
                 className="mb-2"
+                disabled={!isInstructor}
               />
               <Form.Check
                 type="checkbox"
                 id="wd-file-upload"
                 label="File Uploads"
+                disabled={!isInstructor}
               />
             </div>
           </Card>
@@ -275,7 +300,7 @@ export default function AssignmentEditor() {
             <Form.Group className="mb-3">
               <Form.Label htmlFor="wd-assign-to">Assign to</Form.Label>
               <div className="wd-assign-to-container">
-                <span className="wd-assign-tag">Everyone <button className="wd-remove-tag">×</button></span>
+                <span className="wd-assign-tag">Everyone <button className="wd-remove-tag" disabled={!isInstructor}>×</button></span>
               </div>
             </Form.Group>
 
@@ -288,6 +313,7 @@ export default function AssignmentEditor() {
                     id="wd-due-date"
                     value={formData.due}
                     onChange={(e) => setFormData({ ...formData, due: e.target.value })}
+                    disabled={!isInstructor}
                   />
                 </Form.Group>
               </Col>
@@ -302,6 +328,7 @@ export default function AssignmentEditor() {
                     id="wd-available-from"
                     value={formData.from}
                     onChange={(e) => setFormData({ ...formData, from: e.target.value })}
+                    disabled={!isInstructor}
                   />
                 </Form.Group>
               </Col>
@@ -313,6 +340,7 @@ export default function AssignmentEditor() {
                     id="wd-available-until"
                     value={formData.until}
                     onChange={(e) => setFormData({ ...formData, until: e.target.value })}
+                    disabled={!isInstructor}
                   />
                 </Form.Group>
               </Col>
@@ -324,12 +352,21 @@ export default function AssignmentEditor() {
       <hr />
 
       <div className="d-flex justify-content-end gap-2 mb-4">
-        <Button variant="secondary" onClick={handleCancel} disabled={saving}>
-          Cancel
-        </Button>
-        <Button variant="danger" onClick={handleSave} disabled={saving}>
-          {saving ? "Saving..." : "Save"}
-        </Button>
+        {isInstructor && (
+          <>
+            <Button variant="secondary" onClick={handleCancel} disabled={saving}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleSave} disabled={saving}>
+              {saving ? "Saving..." : "Save"}
+            </Button>
+          </>
+        )}
+        {!isInstructor && (
+          <Button variant="secondary" onClick={handleCancel}>
+            Back
+          </Button>
+        )}
       </div>
       </>
       )}

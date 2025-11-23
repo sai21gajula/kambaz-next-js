@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { Nav, NavItem, NavLink } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export default function AccountNavigation() {
   const { currentUser } = useSelector((state: RootState) => state.accountReducer);

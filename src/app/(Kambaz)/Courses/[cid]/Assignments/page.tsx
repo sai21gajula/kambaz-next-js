@@ -13,6 +13,8 @@ import { deleteAssignment, setAssignments } from "./reducer";
 import { RootState } from "../../../store";
 import { useEffect, useState } from "react";
 import * as client from "./client";
+import AssignmentControls from "./AssignmentControls";
+import AssignmentControlButtons from "./AssignmentControlButtons";
 
 export default function Assignments() {
   const { cid } = useParams();
@@ -22,6 +24,8 @@ export default function Assignments() {
   const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { currentUser } = useSelector((state: RootState) => state.accountReducer);
+  const isInstructor = !!(currentUser && (["FACULTY","ADMIN"].includes((currentUser as any).role)));
 
   useEffect(() => {
     if (!cid) {
@@ -66,28 +70,7 @@ export default function Assignments() {
 
   return (
     <div id="wd-assignments">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <Form.Control
-          type="text"
-          placeholder="Search for Assignments"
-          id="wd-search-assignment"
-          className="me-2"
-          style={{ maxWidth: "300px" }}
-        />
-        <div>
-          <Button variant="secondary" size="lg" className="me-2" id="wd-add-assignment-group">
-            <FaPlus className="me-2" />
-            Group
-          </Button>
-          <Link href={`/Courses/${cid}/Assignments/new`}>
-            <Button variant="danger" size="lg" id="wd-add-assignment">
-              <FaPlus className="me-2" />
-              Assignment
-            </Button>
-          </Link>
-        </div>
-      </div>
-      
+      <AssignmentControls cid={cid} isInstructor={isInstructor} /> 
       {error && (
         <Alert variant="danger" onClose={() => setError(null)} dismissible>
           {error}
@@ -135,21 +118,12 @@ export default function Assignments() {
                     <span>{assignment.points ?? 0} pts</span>
                   </div>
                 </div>
-                 <div className="d-flex align-items-center gap-2">
-                  <FaCheckCircle className="text-success me-2" />
-                  <Link href={`/Courses/${cid}/Assignments/${assignment._id}`}>
-                    <FaPencil 
-                      className="text-primary fs-5"
-                      style={{ cursor: "pointer" }}
-                    />
-                  </Link>
-                  <FaTrash 
-                    className="text-danger fs-5"
-                    onClick={() => handleDeleteClick(assignment)}
-                    style={{ cursor: "pointer" }}
-                  />
-                  <IoEllipsisVertical className="fs-4" />
-              </div>
+                <AssignmentControlButtons 
+                  assignment={assignment}
+                  isInstructor={isInstructor}
+                  onDeleteClick={handleDeleteClick}
+                  cid={cid}
+                />
               </ListGroupItem>
             ))
             )}
@@ -176,3 +150,47 @@ export default function Assignments() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ {/* Assignment controls (search + Add buttons) delegated to AssignmentControls component 
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <div className="me-2" style={{ maxWidth: 300, position: 'relative' }}>
+          <FaSearch
+            className="position-absolute"
+            style={{ left: 10, top: '50%', transform: 'translateY(-50%)', color: '#6c757d', zIndex: 5, pointerEvents: 'none', fontSize: '1rem' }}
+            aria-hidden
+          />
+          <Form.Control
+            type="text"
+            placeholder="Search for Assignments"
+            id="wd-search-assignment"
+            className="me-2"
+            style={{ paddingLeft: 44, maxWidth: '100%' }}
+          />
+        </div>
+        <div>
+          <Button variant="secondary" size="lg" className="me-2" id="wd-add-assignment-group">
+            <FaPlus className="me-2" />
+            Group
+          </Button>
+          <Link href={`/Courses/${cid}/Assignments/new`}>
+            <Button variant="danger" size="lg" id="wd-add-assignment">
+              <FaPlus className="me-2" />
+              Assignment
+            </Button>
+          </Link>
+        </div>
+      </div>
+      */}

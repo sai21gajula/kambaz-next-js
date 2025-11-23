@@ -4,6 +4,7 @@ import { Button, Form } from 'react-bootstrap'
 import { FaPlus } from 'react-icons/fa6'
 import { FaSearch } from 'react-icons/fa'
 import { useParams } from 'next/navigation';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export default function AssignmentControls({ cid, isInstructor }: { cid: any; isInstructor: boolean }) {
   return (

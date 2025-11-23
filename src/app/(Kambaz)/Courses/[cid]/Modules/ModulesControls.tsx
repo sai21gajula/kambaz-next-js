@@ -4,6 +4,7 @@ import { FaPlus } from "react-icons/fa6";
 import GreenCheckmark from "./GreenCheckmark";
 import BanCheckmark from "./BanCheckmark";
 import ModuleEditor from "./ModuleEditor";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export default function ModulesControls(
   { moduleName, setModuleName, addModule, isInstructor }:

@@ -2,6 +2,7 @@ import React from 'react'
 import { IoEllipsisVertical } from 'react-icons/io5';
 import { FaTrash, FaPencil } from 'react-icons/fa6';
 import Link from 'next/link';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export default function AssignmentControlButtons({ 
   assignment, 

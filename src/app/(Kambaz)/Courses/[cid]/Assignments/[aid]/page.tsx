@@ -117,7 +117,6 @@ export default function AssignmentEditor() {
     router.push(`/Courses/${cid}/Assignments`);
   };
 
-  // Redirect students trying to create new assignment
   useEffect(() => {
     if (isNewAssignment && !isInstructor) {
       router.push(`/Courses/${cid}/Assignments`);

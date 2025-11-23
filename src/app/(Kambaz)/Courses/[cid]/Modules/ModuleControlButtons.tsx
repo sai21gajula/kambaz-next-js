@@ -3,6 +3,7 @@ import { BsPlus } from "react-icons/bs";
 import { FaTrash } from "react-icons/fa";
 import { FaPencil } from "react-icons/fa6";
 import GreenCheckmark from "./GreenCheckmark";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export default function ModuleControlButtons(
   {moduleId, deleteModule, editModule, isInstructor}: { 

@@ -1,19 +1,21 @@
 "use client"
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Form, Button, Row, Col, Card, FormGroup } from "react-bootstrap";
+import { Form, Button, Row, Col, Card, FormGroup, Alert, Spinner } from "react-bootstrap";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addAssignment, updateAssignment } from "../reducer";
+import { addAssignment, updateAssignment, setAssignments } from "../reducer";
 import { RootState } from "../../../../store";
+import * as client from "../client";
 
 export default function AssignmentEditor() {
   const { cid, aid } = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
   const { assignments } = useSelector((state: RootState) => state.assignmentsReducer);
+  const { currentUser } = useSelector((state: RootState) => state.accountReducer);
+  const isInstructor = !!(currentUser && (["FACULTY","ADMIN"].includes((currentUser as any).role)));
   const assignment = assignments.find((a: any) => a._id === aid);
   const isNewAssignment = aid === "new";
 
@@ -28,6 +30,22 @@ export default function AssignmentEditor() {
     from: "2025-05-06T00:00",
     until: "2025-05-20T23:59",
   });
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const normalizeDateTime = (value?: string) => {
+    if (!value) {
+      return "";
+    }
+    if (value.endsWith("Z")) {
+      const date = new Date(value);
+      const tzOffset = date.getTimezoneOffset();
+      const local = new Date(date.getTime() - tzOffset * 60000);
+      return local.toISOString().slice(0, 16);
+    }
+    return value.slice(0, 16);
+  };
 
   useEffect(() => {
     if (assignment) {
@@ -38,35 +56,92 @@ export default function AssignmentEditor() {
         assignmentGroup: (assignment as any).assignmentGroup || "ASSIGNMENTS",
         displayGradeAs: (assignment as any).displayGradeAs || "Percentage",
         submissionType: (assignment as any).submissionType || "Online",
-        due: assignment.due || "2025-05-13T23:59",
-        from: assignment.from || "2025-05-06T00:00",
-        until: assignment.until || "2025-05-20T23:59",
+        due: normalizeDateTime(assignment.due) || "2025-05-13T23:59",
+        from: normalizeDateTime(assignment.from) || "2025-05-06T00:00",
+        until: normalizeDateTime(assignment.until) || "2025-05-20T23:59",
       });
     }
   }, [assignment]);
 
-  const handleSave = () => {
-    if (isNewAssignment) {
-      dispatch(addAssignment({
-        ...formData,
-        course: cid,
-      }));
-    } else {
-      dispatch(updateAssignment({
-        _id: aid,
-        ...formData,
-        course: cid,
-      }));
+  useEffect(() => {
+    if (!cid || isNewAssignment || assignment) {
+      return;
     }
-    router.push(`/Courses/${cid}/Assignments`);
+    const loadAssignments = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await client.fetchAssignmentsForCourse(cid as string);
+        dispatch(setAssignments(data));
+      } catch (err) {
+        console.error("Failed to load assignment", err);
+        setError("Could not load assignments from server.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadAssignments();
+  }, [assignment, cid, dispatch, isNewAssignment]);
+
+  const handleSave = async () => {
+    if (!cid) {
+      return;
+    }
+    setSaving(true);
+    setError(null);
+    try {
+      if (isNewAssignment) {
+        const created = await client.createAssignmentForCourse(cid as string, {
+          ...formData,
+          course: cid,
+        });
+        dispatch(addAssignment(created));
+      } else {
+        const updated = await client.updateAssignment({
+          _id: aid,
+          ...formData,
+          course: cid,
+        });
+        dispatch(updateAssignment(updated));
+      }
+      router.push(`/Courses/${cid}/Assignments`);
+    } catch (err) {
+      console.error("Failed to save assignment", err);
+      setError("Failed to save assignment. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancel = () => {
     router.push(`/Courses/${cid}/Assignments`);
   };
 
+  // Redirect students trying to create new assignment
+  useEffect(() => {
+    if (isNewAssignment && !isInstructor) {
+      router.push(`/Courses/${cid}/Assignments`);
+    }
+  }, [isNewAssignment, isInstructor, cid, router]);
+
   return (
     <div id="wd-assignments-editor" className="container mt-4">
+      {error && (
+        <Alert variant="danger" onClose={() => setError(null)} dismissible>
+          {error}
+        </Alert>
+      )}
+      {!isInstructor && (
+        <Alert variant="info" className="mb-3">
+          <strong>View Only:</strong> Students can only view assignments. Only instructors can edit assignments.
+        </Alert>
+      )}
+      {loading && !assignment && !isNewAssignment ? (
+        <div className="d-flex justify-content-center my-5">
+          <Spinner animation="border" role="status" />
+        </div>
+      ) : (
+        <>
       <Row className="mb-3">
         <Col>
           <FormGroup>
@@ -77,6 +152,7 @@ export default function AssignmentEditor() {
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               size="lg"
+              disabled={!isInstructor}
             />
           </FormGroup>
         </Col>
@@ -92,6 +168,7 @@ export default function AssignmentEditor() {
               rows={8}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              disabled={!isInstructor}
             />
           </Form.Group>
         </Col>
@@ -107,6 +184,7 @@ export default function AssignmentEditor() {
             id="wd-points"
             value={formData.points}
             onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
+            disabled={!isInstructor}
           />
         </Col>
       </Row>
@@ -120,6 +198,7 @@ export default function AssignmentEditor() {
             id="wd-group" 
             value={formData.assignmentGroup}
             onChange={(e) => setFormData({ ...formData, assignmentGroup: e.target.value })}
+            disabled={!isInstructor}
           >
             <option value="ASSIGNMENTS">ASSIGNMENTS</option>
             <option value="REFLECTIONS">REFLECTIONS</option>
@@ -139,6 +218,7 @@ export default function AssignmentEditor() {
             id="wd-display-grade-as" 
             value={formData.displayGradeAs}
             onChange={(e) => setFormData({ ...formData, displayGradeAs: e.target.value })}
+            disabled={!isInstructor}
           >
             <option value="Percentage">Percentage</option>
             <option value="Complete/Incomplete">Complete/Incomplete</option>
@@ -161,6 +241,7 @@ export default function AssignmentEditor() {
               className="mb-3" 
               value={formData.submissionType}
               onChange={(e) => setFormData({ ...formData, submissionType: e.target.value })}
+              disabled={!isInstructor}
             >
               <option value="Online">Online</option>
               <option value="No Submission">No Submission</option>
@@ -175,6 +256,7 @@ export default function AssignmentEditor() {
                 id="wd-text-entry"
                 label="Text Entry"
                 className="mb-2"
+                disabled={!isInstructor}
               />
               <Form.Check
                 type="checkbox"
@@ -182,23 +264,27 @@ export default function AssignmentEditor() {
                 label="Website URL"
                 className="mb-2"
                 defaultChecked
+                disabled={!isInstructor}
               />
               <Form.Check
                 type="checkbox"
                 id="wd-media-recordings"
                 label="Media Recordings"  
                 className="mb-2"
+                disabled={!isInstructor}
               />
               <Form.Check
                 type="checkbox"
                 id="wd-student-annotation"
                 label="Student Annotation"
                 className="mb-2"
+                disabled={!isInstructor}
               />
               <Form.Check
                 type="checkbox"
                 id="wd-file-upload"
                 label="File Uploads"
+                disabled={!isInstructor}
               />
             </div>
           </Card>
@@ -214,7 +300,7 @@ export default function AssignmentEditor() {
             <Form.Group className="mb-3">
               <Form.Label htmlFor="wd-assign-to">Assign to</Form.Label>
               <div className="wd-assign-to-container">
-                <span className="wd-assign-tag">Everyone <button className="wd-remove-tag">×</button></span>
+                <span className="wd-assign-tag">Everyone <button className="wd-remove-tag" disabled={!isInstructor}>×</button></span>
               </div>
             </Form.Group>
 
@@ -227,6 +313,7 @@ export default function AssignmentEditor() {
                     id="wd-due-date"
                     value={formData.due}
                     onChange={(e) => setFormData({ ...formData, due: e.target.value })}
+                    disabled={!isInstructor}
                   />
                 </Form.Group>
               </Col>
@@ -241,6 +328,7 @@ export default function AssignmentEditor() {
                     id="wd-available-from"
                     value={formData.from}
                     onChange={(e) => setFormData({ ...formData, from: e.target.value })}
+                    disabled={!isInstructor}
                   />
                 </Form.Group>
               </Col>
@@ -252,6 +340,7 @@ export default function AssignmentEditor() {
                     id="wd-available-until"
                     value={formData.until}
                     onChange={(e) => setFormData({ ...formData, until: e.target.value })}
+                    disabled={!isInstructor}
                   />
                 </Form.Group>
               </Col>
@@ -263,13 +352,24 @@ export default function AssignmentEditor() {
       <hr />
 
       <div className="d-flex justify-content-end gap-2 mb-4">
-        <Button variant="secondary" onClick={handleCancel}>
-          Cancel
-        </Button>
-        <Button variant="danger" onClick={handleSave}>
-          Save
-        </Button>
+        {isInstructor && (
+          <>
+            <Button variant="secondary" onClick={handleCancel} disabled={saving}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleSave} disabled={saving}>
+              {saving ? "Saving..." : "Save"}
+            </Button>
+          </>
+        )}
+        {!isInstructor && (
+          <Button variant="secondary" onClick={handleCancel}>
+            Back
+          </Button>
+        )}
       </div>
+      </>
+      )}
     </div>    
   );
 }

@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { v4 as uuidv4 } from "uuid";
 
 interface Enrollment {
   _id: string;
@@ -24,23 +23,17 @@ const enrollmentsSlice = createSlice({
     },
     enrollUserInCourse: (
       state,
-      action: PayloadAction<{ userId: string; courseId: string }>
+      action: PayloadAction<Enrollment>
     ) => {
-      const { userId, courseId } = action.payload;
-      const newEnrollment: Enrollment = {
-        _id: uuidv4(),
-        user: userId,
-        course: courseId,
-      };
-      state.enrollments = [...state.enrollments, newEnrollment];
+      state.enrollments = [...state.enrollments, action.payload];
     },
     unenrollUserFromCourse: (
       state,
-      action: PayloadAction<{ userId: string; courseId: string }>
+      action: PayloadAction<string>
     ) => {
-      const { userId, courseId } = action.payload;
+      const enrollmentId = action.payload;
       state.enrollments = state.enrollments.filter(
-        (enrollment) => !(enrollment.user === userId && enrollment.course === courseId)
+        (enrollment) => enrollment._id !== enrollmentId
       );
     },
   },

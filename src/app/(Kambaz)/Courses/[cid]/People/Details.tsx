@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { FormControl } from "react-bootstrap";
 import * as client from "../../../Account/client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export default function PeopleDetails({ uid, onClose }: { uid: string | null; onClose: () => void; }) {
   const [user, setUser] = useState<any>({});

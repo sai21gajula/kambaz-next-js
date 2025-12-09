@@ -20,6 +20,11 @@ export const findUserByUsername = async (username: string) => {
   return data;
 };
 
+export const findUsersByPartialName = async (name: string) => {
+  const { data } = await axiosWithCredentials.get(`${USERS_API}?name=${name}`);
+  return data;
+};
+
 export const findUsersInCourse = async (courseId: string) => {
   const { data } = await axiosWithCredentials.get(`${HTTP_SERVER}/api/courses/${courseId}/users`);
   return data;
@@ -43,6 +48,7 @@ export default {
   findAllUsers,
   findUserById,
   findUserByUsername,
+  findUsersByPartialName,
   findUsersInCourse,
   createUser,
   updateUser,

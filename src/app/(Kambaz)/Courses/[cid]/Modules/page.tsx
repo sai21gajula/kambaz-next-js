@@ -24,7 +24,8 @@ export default function Modules() {
   const dispatch = useDispatch();
   
   const onRemoveModule = async (moduleId: string) => {
-      await client.deleteModule(moduleId);
+      if (!cid) return;
+      await client.deleteModule(cid as string, moduleId);
       const filtered = modules.filter((m: any) => m._id !== moduleId);
       dispatch(setModules(filtered));
   };
@@ -40,7 +41,8 @@ export default function Modules() {
   };
 
   const onUpdateModule = async (module: any) => {
-      const updated = await client.updateModule(module);
+      if (!cid) return;
+      const updated = await client.updateModule(cid as string, module);
       /* eslint-disable-next-line @next/next/no-assign-module-variable */
       const newModules = modules.map((m: any) => (m._id === updated._id ? updated : m));
       dispatch(setModules(newModules));

@@ -9,6 +9,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../../../store";
 import { setUsers, updateUser, deleteUser, addUser } from "../reducer";
 import * as usersClient from "../client";
+import * as coursesClient from "../../../client";
 import * as enrollmentClient from "../../../../Enrollments/client";
 import * as db from "../../../../Database";
 import { setCurrentUser } from "../../../../Account/reducer";
@@ -38,11 +39,13 @@ export default function PeopleTable() {
   const [addUsername, setAddUsername] = useState("");
   const [addUserLoading, setAddUserLoading] = useState(false);
   const [addUserError, setAddUserError] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
   
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const courseUsers = await usersClient.findUsersInCourse(cid as string);
+        const courseUsers = await coursesClient.findUsersForCourse(cid as string);
         dispatch(setUsers(courseUsers));
       } catch (error) {
         console.error("Failed to fetch course users:", error);
@@ -90,71 +93,88 @@ export default function PeopleTable() {
 
   const handleDeleteClick = async (userId: string) => {
     if (window.confirm("Are you sure you want to unenroll this user from the course?")) {
-      try {
-        const enrollment = enrollments.find(
-          (e: any) => e.user === userId && e.course === cid
-        );
-        
-        if (enrollment) {
-          await enrollmentClient.unenrollUserFromCourse((enrollment as any)._id);
-          dispatch(deleteUser(userId));
-        }
-      } catch (error) {
-        console.error("Failed to unenroll user:", error);
+      const enrollment = enrollments.find(
+        (e: any) => e.user === userId && e.course === cid
+      );
+      
+      if (enrollment) {
+        await coursesClient.unenrollFromCourse(userId, cid as string);
+        dispatch(deleteUser(userId));
+        const courseUsers = await coursesClient.findUsersForCourse(cid as string);
+        dispatch(setUsers(courseUsers));
       }
     }
   };
 
   const handleAddUser = async () => {
     if (!addUsername.trim()) {
-      setAddUserError("Please enter a username");
+      setAddUserError("Please enter a username or name");
       return;
     }
 
     setAddUserLoading(true);
     setAddUserError("");
 
-    try {
-      let foundUser = null;
+    const searchResults = await usersClient.findUsersByPartialName(addUsername);
+    const foundUser = searchResults.length > 0 ? searchResults[0] : null;
 
-      try {
-        foundUser = await usersClient.findUserByUsername(addUsername);
-      } catch (apiError) {
-        console.error("API search failed, trying local database:", apiError);
-        foundUser = db.users.find((u: any) => u.username === addUsername);
-      }
-
-      if (!foundUser) {
-        setAddUserError("User not found");
-        setAddUserLoading(false);
-        return;
-      }
-
-      const alreadyEnrolled = enrollments.some(
-        (e: any) => e.user === foundUser._id && e.course === cid
-      );
-
-      if (alreadyEnrolled) {
-        setAddUserError("User is already enrolled in this course");
-        setAddUserLoading(false);
-        return;
-      }
-
-      const newEnrollment = await enrollmentClient.enrollUserInCourse(
-        foundUser._id,
-        cid as string
-      );
-
-      dispatch(addUser(foundUser));
-
-      setAddUsername("");
-      setAddUserError("");
-    } catch (error) {
-      console.error("Failed to add user:", error);
-      setAddUserError("Failed to add user to course");
-    } finally {
+    if (!foundUser) {
+      setAddUserError("User not found");
       setAddUserLoading(false);
+      return;
     }
+
+    const alreadyEnrolled = enrollments.some(
+      (e: any) => e.user === foundUser._id && e.course === cid
+    );
+
+    if (alreadyEnrolled) {
+      setAddUserError("User is already enrolled in this course");
+      setAddUserLoading(false);
+      return;
+    }
+
+    await coursesClient.enrollIntoCourse(foundUser._id, cid as string);
+    dispatch(addUser(foundUser));
+
+    const courseUsers = await coursesClient.findUsersForCourse(cid as string);
+    dispatch(setUsers(courseUsers));
+
+    setAddUsername("");
+    setAddUserError("");
+    setShowSearchResults(false);
+    setAddUserLoading(false);
+  };
+
+  const handleSearchUsers = async (query: string) => {
+    setAddUsername(query);
+    if (query.trim().length === 0) {
+      setShowSearchResults(false);
+      setSearchResults([]);
+      return;
+    }
+
+    const results = await usersClient.findUsersByPartialName(query);
+    const notEnrolled = results.filter((user: any) =>
+      !enrollments.some((e: any) => e.user === user._id && e.course === cid)
+    );
+    setSearchResults(notEnrolled);
+    setShowSearchResults(true);
+  };
+
+  const handleSelectUser = async (user: any) => {
+    setAddUsername("");
+    setShowSearchResults(false);
+    setAddUserLoading(true);
+    setAddUserError("");
+
+    await coursesClient.enrollIntoCourse(user._id, cid as string);
+    dispatch(addUser(user));
+
+    const courseUsers = await coursesClient.findUsersForCourse(cid as string);
+    dispatch(setUsers(courseUsers));
+
+    setAddUserLoading(false);
   };
 
   const isFaculty = currentUser && (currentUser as any).role === "FACULTY";
@@ -166,22 +186,42 @@ export default function PeopleTable() {
       {isFaculty && (
         <div className="mb-4 p-3 border rounded bg-light">
           <h5>Add User to Course</h5>
-          <div className="d-flex gap-2">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Enter username"
-              value={addUsername}
-              onChange={(e) => setAddUsername(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleAddUser()}
-              disabled={addUserLoading}
-            />
+          <div className="d-flex gap-2 position-relative">
+            <div className="flex-grow-1 position-relative">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search by name or username"
+                value={addUsername}
+                onChange={(e) => handleSearchUsers(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleAddUser()}
+                disabled={addUserLoading}
+                autoComplete="off"
+              />
+              {showSearchResults && searchResults.length > 0 && (
+                <div className="position-absolute top-100 start-0 end-0 bg-white border border-gray rounded mt-1" style={{ zIndex: 1000, maxHeight: "300px", overflowY: "auto" }}>
+                  {searchResults.map((user: any) => (
+                    <div
+                      key={user._id}
+                      className="p-2 border-bottom cursor-pointer"
+                      onClick={() => handleSelectUser(user)}
+                      style={{ cursor: "pointer" }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f5f5"}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "white"}
+                    >
+                      <div className="fw-bold">{user.firstName} {user.lastName}</div>
+                      <div className="small text-muted">{user.username}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <Button
               variant="success"
               onClick={handleAddUser}
-              disabled={addUserLoading}
+              disabled={addUserLoading || !addUsername.trim()}
             >
-              {addUserLoading ? "Adding..." : "Add User"}
+              {addUserLoading ? "Adding..." : "Add"}
             </Button>
           </div>
           {addUserError && <div className="alert alert-danger mt-2 mb-0">{addUserError}</div>}
@@ -202,17 +242,18 @@ export default function PeopleTable() {
         </thead>
         <tbody>
           {users.map((user: any) => (
+            user && (
             <tr key={user._id}>
               <td className="wd-full-name text-nowrap">
                 <FaUserCircle className="me-2 fs-1 text-secondary" />
-                <span className="wd-first-name">{user.firstName}</span>
-                <span className="wd-last-name">{user.lastName}</span>
+                <span className="wd-first-name">{user?.firstName || ""}</span>
+                <span className="wd-last-name">{user?.lastName || ""}</span>
               </td>
-              <td className="wd-login-id">{user.loginId}</td>
-              <td className="wd-section">{user.section}</td>
-              <td className="wd-role">{user.role}</td>
-              <td className="wd-last-activity">{user.lastActivity}</td>
-              <td className="wd-total-activity">{user.totalActivity}</td>
+              <td className="wd-login-id">{user?.loginId || ""}</td>
+              <td className="wd-section">{user?.section || ""}</td>
+              <td className="wd-role">{user?.role || ""}</td>
+              <td className="wd-last-activity">{user?.lastActivity || ""}</td>
+              <td className="wd-total-activity">{user?.totalActivity || ""}</td>
               {isFaculty && (
                 <td className="wd-actions text-center">
                   <Button
@@ -233,6 +274,7 @@ export default function PeopleTable() {
                 </td>
               )}
             </tr>
+            )
           ))}
         </tbody>
       </Table>

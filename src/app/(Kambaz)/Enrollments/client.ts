@@ -25,6 +25,9 @@ export const enrollUserInCourse = async (userId: string, courseId: string) => {
   return data;
 };
 
+// Alias for convenience
+export const enrollUser = enrollUserInCourse;
+
 export const unenrollUserFromCourse = async (enrollmentId: string) => {
   const { data } = await axiosWithCredentials.delete(`${ENROLLMENTS_API}/${enrollmentId}`);
   return data;
@@ -35,5 +38,6 @@ export default {
   findEnrollmentsForUser,
   findEnrollmentsForCourse,
   enrollUserInCourse,
+  enrollUser,
   unenrollUserFromCourse,
 };

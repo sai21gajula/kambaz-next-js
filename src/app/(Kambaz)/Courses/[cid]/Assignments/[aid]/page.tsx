@@ -91,14 +91,13 @@ export default function AssignmentEditor() {
     setError(null);
     try {
       if (isNewAssignment) {
-        const created = await client.createAssignmentForCourse(cid as string, {
+        const created = await client.createAssignment(cid as string, {
           ...formData,
           course: cid,
         });
         dispatch(addAssignment(created));
       } else {
-        const updated = await client.updateAssignment({
-          _id: aid,
+        const updated = await client.updateAssignment(aid as string, {
           ...formData,
           course: cid,
         });

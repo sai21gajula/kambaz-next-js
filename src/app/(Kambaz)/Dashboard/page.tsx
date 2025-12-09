@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Card,CardImg,CardBody, CardTitle, Row,CardText, Col, Button, FormControl } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { addNewCourse, deleteCourse, updateCourse, setCourses } from "../Courses/reducer";
@@ -61,13 +62,16 @@ export default function Dashboard() {
   const handleEnroll = async (courseId: string) => {
     if (!currentUser) return;
     try {
-      const newEnrollment = await enrollmentClient.enrollUserInCourse(
+      const newEnrollment = await client.enrollIntoCourse(
         (currentUser as any)._id,
         courseId
       );
       dispatch(enrollUserInCourse(newEnrollment));
+      // Refresh enrollments to ensure UI is in sync
+      await fetchEnrollments();
     } catch (error) {
       console.error("Failed to enroll:", error);
+      alert("Failed to enroll in course. Please try again.");
     }
   };
 
@@ -78,11 +82,13 @@ export default function Dashboard() {
         (e: any) => e.user === (currentUser as any)._id && e.course === courseId
       );
       if (enrollment) {
-        await enrollmentClient.unenrollUserFromCourse((enrollment as any)._id);
+        await client.unenrollFromCourse((currentUser as any)._id, courseId);
         dispatch(unenrollUserFromCourse((enrollment as any)._id));
+        await fetchEnrollments();
       }
     } catch (error) {
       console.error("Failed to unenroll:", error);
+      alert("Failed to unenroll from course. Please try again.");
     }
   };
 
@@ -130,7 +136,6 @@ export default function Dashboard() {
     }
   };
 
-  // Filter enrolled courses
   const enrolledCourses = currentUser ? courses.filter((course: any) =>
     enrollments.some(
       (enrollment: any) =>
@@ -139,7 +144,6 @@ export default function Dashboard() {
     )
   ) : [];
 
-  // Display all courses or only enrolled courses based on toggle
   const displayedCourses = showAllCourses ? courses : enrolledCourses;
 
   return (
@@ -190,7 +194,13 @@ export default function Dashboard() {
               <Card>
                 <Link href={`/Courses/${course._id}/Home`}       
                                className="wd-dashboard-course-link text-decoration-none text-dark" >
-                  <CardImg src={course.image} variant="top" width="100%" height={160} />
+                  <img 
+                    src={course.image || "/images/reactjs.png"} 
+                    alt={course.name}
+                    width="100%"
+                    height="160"
+                    style={{ objectFit: "cover", display: "block" }}
+                  />
                   <CardBody className="card-body">
                     <CardTitle className="wd-dashboard-course-title text-nowrap overflow-hidden">
                       {course.name} </CardTitle>

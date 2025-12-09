@@ -4,7 +4,7 @@
 import { ReactNode, useState, useEffect } from "react";
 import CourseNavigation from "./Navigation";
 import { FaAlignJustify } from "react-icons/fa";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
 import { RootState } from "../../store";
 import Breadcrumb from "./Breadcrumb";
@@ -15,6 +15,7 @@ export default function CoursesLayout(
   const router = useRouter();
   const { courses } = useSelector((state: RootState) => state.coursesReducer);
   const { currentUser } = useSelector((state: RootState) => state.accountReducer);
+  const dispatch = useDispatch();
   const { enrollments } = useSelector((state: RootState) => state.enrollmentsReducer);
   const course = courses.find((course: any) => course._id === cid);
   const [showNavigation, setShowNavigation] = useState(true);
